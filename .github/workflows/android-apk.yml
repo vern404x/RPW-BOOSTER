@@ -9,6 +9,8 @@ jobs:
   build-apk:
     name: Build Android APK (arm64-v8a)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     env:
       EXPO_NO_TELEMETRY: 1
@@ -65,7 +67,7 @@ jobs:
           with open(path) as f:
               c = f.read()
 
-          # Add ABI splits (DO NOT also add ndk abiFilters — they conflict)
+          # Add ABI splits only (ndk abiFilters conflicts with splits — do NOT add both)
           if "splits {" not in c:
               splits = """
               splits {
@@ -79,15 +81,15 @@ jobs:
           """
               c = c.replace("    buildTypes {", splits + "    buildTypes {", 1)
 
-          # Remove any existing ndk abiFilters to avoid the conflict error
+          # Strip any existing ndk abiFilters block to avoid Gradle conflict
           c = re.sub(r'\s*ndk\s*\{[^}]*abiFilters[^}]*\}', '', c)
 
-          # Enable R8 minify
+          # Enable R8 minify for smaller APK
           c = re.sub(r'minifyEnabled\s+false', 'minifyEnabled true', c)
 
           with open(path, "w") as f:
               f.write(c)
-          print("Patched: arm64-v8a splits (no conflicting abiFilters) + R8 minify")
+          print("Patched: arm64-v8a splits + R8 minify (no conflicting abiFilters)")
           PYEOF
 
       - name: Make gradlew executable
@@ -103,12 +105,11 @@ jobs:
             -XX:MaxMetaspaceSize=512m
             -Dkotlin.incremental=false
 
-      - name: Get APK info
+      - name: Show APK size
         run: |
           APK=$(find artifacts/rpw-mobile/android/app/build/outputs/apk/debug -name "*.apk" | head -1)
-          echo "APK_PATH=$APK" >> $GITHUB_ENV
-          echo "SIZE=$(du -sh "$APK" | cut -f1)" >> $GITHUB_ENV
           ls -lh "$APK"
+          echo "SIZE=$(du -sh "$APK" | cut -f1)" >> $GITHUB_ENV
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -127,6 +128,7 @@ jobs:
             ## RPW BOOSTER — Android APK
 
             **Build:** #${{ github.run_number }} | **Arch:** arm64-v8a | **Size:** ${{ env.SIZE }}
+            **API:** https://rpw-boosterxd.onrender.com
 
             ### Install
             1. Download `app-debug.apk` below
@@ -134,9 +136,8 @@ jobs:
             3. Open APK → Install → Open RPW BOOSTER → paste FB cookie → Login
 
             *Auto-built via GitHub Actions*
-          files: ${{ env.APK_PATH }}
+          files: artifacts/rpw-mobile/android/app/build/outputs/apk/debug/app-debug.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
