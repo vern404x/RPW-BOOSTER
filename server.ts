@@ -9,7 +9,7 @@
 // ╚══════════════════════════════════════════════════════════════════╝
 
 // ── EDIT THIS LINE AFTER DEPLOYING TO RENDER ─────────────────────────────────
-export const SERVER_URL = "https://rpw-booster-api.onrender.com";
+export const SERVER_URL = "https://rpw-boosterxd.onrender.com";
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Script mode: run with "pnpm server:sync" to propagate URL everywhere ─────

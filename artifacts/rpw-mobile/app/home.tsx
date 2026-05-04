@@ -9,7 +9,7 @@ import { useApp } from '@/context/AppContext';
 import ToolCard, { type ToolDef } from '@/components/ToolCard';
 
 const APP_VERSION = '1.5.1';
-const API_BASE = (process.env['EXPO_PUBLIC_API_URL'] ?? 'https://rpw-booster-api.onrender.com/api/fb').replace('/api/fb', '');
+const API_BASE = (process.env['EXPO_PUBLIC_API_URL'] ?? 'https://rpw-boosterxd.onrender.com/api/fb').replace('/api/fb', '');
 
 interface ReleaseInfo {
   tag: string;
